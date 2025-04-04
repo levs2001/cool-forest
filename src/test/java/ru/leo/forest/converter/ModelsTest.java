@@ -52,7 +52,7 @@ public class ModelsTest extends ModelsTestBase {
     @ParameterizedTest
     @MethodSource("provideModelsAndResults")
     void testCoolForest(Path model, double[] expected) throws IOException {
-        var coolForest = CoolForestFactory.scaledCoolForest(converter.readMonoforest(model));
+        var coolForest = CoolForestFactory.makeCoolForest(converter.readMonoforest(model), 100, 0.3);
         var actual = coolForest.predictDouble(FEATURES);
         assertArrayEquals(expected, actual, 1e-5F);
     }

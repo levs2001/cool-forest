@@ -18,48 +18,53 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.leo.forest.converter.Converter;
 import ru.leo.forest.converter.ConverterImpl;
-import ru.leo.forest.rank.FuncRanker;
-import ru.leo.forest.rank.Ranker;
+import ru.leo.forest.tree.cool.CoolForest;
 import ru.leo.forest.tree.cool.CoolForestFactory;
 
 @State(Scope.Benchmark)
-public class JmllEnsembleBenchmark {
+public class CoolForestBenchmark {
     private static final Converter converter = new ConverterImpl();
 
-    private volatile Ranker ranker;
     @Param({
         "model_10_4",
         "model_100_6",
     })
     private String modelName;
-    // TODO: Use enum
+
     @Param({
-        "simple",
-        "jmll",
-        "bin",
-        "cool_forest"
+        "10",
+        "30",
+        "50",
+        "100",
+        "300",
+        "500"
     })
-    private String modelType;
+    private int supportedTrigger;
+
+    @Param({
+        "0.05",
+        "0.1",
+        "0.2",
+        "0.3",
+        "0.4",
+        "0.5"
+    })
+    private double supportedFeatureFreq;
+    private volatile CoolForest coolForest;
 
     @Setup
     public void setup() throws IOException {
         var modelPath = BenchUtils.getModelPath(modelName + ".json");
-        ranker = switch (modelType) {
-            case "simple" -> new FuncRanker(converter.readSimple(modelPath));
-            case "jmll" -> new FuncRanker(converter.read(modelPath));
-            case "bin" -> converter.readOTBin(modelPath);
-            case "cool_forest" -> CoolForestFactory.makeCoolForest(converter.readMonoforest(modelPath), 100, 0.3);
-            default -> throw new IllegalStateException("Unexpected value: " + modelType);
-        };
+        coolForest = CoolForestFactory.makeCoolForest(converter.readMonoforest(modelPath), supportedTrigger, supportedFeatureFreq);
     }
 
     @Benchmark
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
     @Fork(value = 1)
-    @Warmup(iterations = 3, time = 10)
-    @Measurement(iterations = 3, time = 10)
+    @Warmup(iterations = 3, time = 5)
+    @Measurement(iterations = 3, time = 5)
     public void test(Blackhole bh) {
-        bh.consume(ranker.predictVec(FEATURES_VECS));
+        bh.consume(coolForest.predictVec(FEATURES_VECS));
     }
 }

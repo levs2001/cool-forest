@@ -11,14 +11,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import ru.leo.forest.util.ByteMapImpl;
 
 // TODO: От scale и bias надо потихоньку избавляться,
 //  и еще посмотреть влияет ли он как-то на скорость
 public class CoolForestFactory {
-    private static final int MONOMS_TO_MAKE_SUPPORTED = 100;
-    private static final double SUPPORTED_FEATURE_FREQ = 0.3;
+    private final int supportedTrigger;
+    private final double supportedFeatureFreq;
 
-    public static CoolForest scaledCoolForest(ModelTools.CompiledOTEnsemble monoforest) {
+    public CoolForestFactory(int supportedTrigger, double supportedFeatureFreq) {
+        this.supportedTrigger = supportedTrigger;
+        this.supportedFeatureFreq = supportedFeatureFreq;
+    }
+
+    public static CoolForest makeCoolForest(
+        ModelTools.CompiledOTEnsemble monoforest,
+        int monomsToMakeSupported,
+        double supportedFeatureFreq
+    ) {
+        var factory = new CoolForestFactory(monomsToMakeSupported, supportedFeatureFreq);
+        return factory.createScaledCoolForest(monoforest);
+    }
+
+    public CoolForest createScaledCoolForest(ModelTools.CompiledOTEnsemble monoforest) {
         return new ScaledCoolForest(
             monoforest.getGrid(),
             fromMonoforest(monoforest),
@@ -27,18 +42,15 @@ public class CoolForestFactory {
         );
     }
 
-    public static CoolForest fromMonoforest(ModelTools.CompiledOTEnsemble monoforest) {
+    private CoolForest fromMonoforest(ModelTools.CompiledOTEnsemble monoforest) {
         var grid = monoforest.getGrid();
         var monoms = monoforest.getEntries().stream().map(e -> FullMonom.fromEntry(e, grid)).toList();
 
         return fromMonoms(monoms, grid);
     }
 
-    public static CoolForest fromMonoms(List<FullMonom> monoms, BFGrid bfGrid) {
-        // TODO: Проверить, почему не оптимайзится, если судить по логам
-        // TODO: CoolForest создается даже для пустого монома
-        optimize(monoms);
-        if (monoms.size() < MONOMS_TO_MAKE_SUPPORTED) {
+    private CoolForest fromMonoms(List<FullMonom> monoms, BFGrid bfGrid) {
+        if (monoms.size() < supportedTrigger) {
             return new CoolForestSimple(bfGrid, monoms);
         }
 
@@ -46,7 +58,7 @@ public class CoolForestFactory {
         var mostCommonFeature = featureUsage.int2IntEntrySet().stream()
             .max(Comparator.comparingInt(Int2IntMap.Entry::getIntValue)).get();
         int freq = mostCommonFeature.getIntValue();
-        if ((double) freq / monoms.size() < SUPPORTED_FEATURE_FREQ) {
+        if ((double) freq / monoms.size() < supportedFeatureFreq) {
             return new CoolForestSimple(bfGrid, monoms);
         }
         // TODO: Появляются мономы с одним условием, что весьма бесполезно?
@@ -59,10 +71,6 @@ public class CoolForestFactory {
             int featureBin = monom.featureBin(featureIdx);
             if (featureBin != FullMonom.NO_FEATURE) {
                 // TODO: Моном с чистым vslue тоже становится мономом.
-                // TODO: когда я without вызываю удаляются условия, так что возможно
-                //  надо value схлопывать
-                // TODO: Прилетает куча мономов без условий, их надо схлопывать в один моном
-                // Посмотреть на пустые мономы можно на примере 100 деревьев в дебаггере
                 byFVGroups.computeIfAbsent(featureBin, k -> new ArrayList<>())
                     .add(monom.without(featureIdx));
             } else {
@@ -70,8 +78,9 @@ public class CoolForestFactory {
             }
         }
 
-        Int2ObjectMap<CoolForest> byFvFroupsForests = new Int2ObjectArrayMap<>();
-        byFVGroups.forEach((bin, ms) -> byFvFroupsForests.put(bin, fromMonoms(ms, bfGrid)));
+        // Int2ObjectArrayMap ищит ключ просто обходя массив с конца, здесь лучше использовать ассоциативный массив ByteMapImpl
+        Int2ObjectMap<CoolForest> byFvFroupsForests = new ByteMapImpl<>();
+        byFVGroups.forEach((bin, ms) -> byFvFroupsForests.put((int) bin, fromMonoms(ms, bfGrid)));
 
         return new CoolForestSupported(
             bfGrid,
@@ -81,6 +90,7 @@ public class CoolForestFactory {
         );
     }
 
+//    там нечено оптимайзить, одинаковые условия monoforest сам отсеивает
     private static List<FullMonom> optimize(List<FullMonom> monoms) {
         Int2ObjectMap<List<FullMonom>> conditionGroups = new Int2ObjectOpenHashMap<>();
         monoms.forEach(

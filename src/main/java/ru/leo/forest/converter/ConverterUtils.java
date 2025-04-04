@@ -23,4 +23,14 @@ public class ConverterUtils {
         return res;
     }
 
+    public static float[][] toFloat(double[][] features) {
+        float[][] res = new float[features.length][features[0].length];
+        for (int i = 0; i < features.length; i++) {
+            for (int j = 0; j < features[i].length; j++) {
+                res[i][j] = (float) features[i][j];
+            }
+        }
+
+        return res;
+    }
 }

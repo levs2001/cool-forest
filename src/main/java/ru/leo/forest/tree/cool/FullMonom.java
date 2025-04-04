@@ -27,7 +27,7 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
         return new FullMonom(featureIdx, featureBins, bfIndices, entry.getValue());
     }
 
-    // TODO: Make better hash
+    // TODO: Make better hash if need
     public int conditionsHashCode() {
         return Arrays.toString(bfIndices).hashCode();
     }

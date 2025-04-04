@@ -9,10 +9,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class MonoforestConverterImplTest extends ModelsTestBase {
     private final MonoforestConverter monoforestConverter = new MonoforestConverterImpl();
-    private static final Path MODEL_3_PATH = RES_PATH.resolve("monoforest_3.json");
-    private static final Path MODEL_10_PATH = RES_PATH.resolve("monoforest_10_4.json");
-    private static final Path MODEL_100_PATH = RES_PATH.resolve("monoforest_100_6.json");
-    private static final Path MODEL_1000_PATH = RES_PATH.resolve("monoforest_1000_6.json");
+    private static final Path MODEL_3_PATH = RES_PATH.resolve("monoforest/monoforest_3.json");
+    private static final Path MODEL_10_PATH = RES_PATH.resolve("monoforest/monoforest_10_4.json");
+    private static final Path MODEL_100_PATH = RES_PATH.resolve("monoforest/monoforest_100_6.json");
+    private static final Path MODEL_1000_PATH = RES_PATH.resolve("monoforest/monoforest_1000_6.json");
 
     @ParameterizedTest
     @MethodSource("provideModelsAndResults")

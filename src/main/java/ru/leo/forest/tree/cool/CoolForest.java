@@ -7,11 +7,7 @@ import ru.leo.forest.converter.ConverterUtils;
 import ru.leo.forest.rank.Ranker;
 
 public sealed interface CoolForest extends Ranker {
-    // TODO; Подумать, что лучше сюда пихнуть, чтобы было проще вычислять
-    //  value без лишних затрат
-
-    // TODO: Должны быть методы вычисления, подумать какие.
-
+    // TODO: Сделать версию этого метода, которая сразу для всего считает, скорее всего на обходах мы победим.
     double value(BinarizedDataSet bds, int index);
 
     abstract sealed class Stub implements CoolForest permits CoolForestSimple, CoolForestSupported, ScaledCoolForest {
@@ -22,10 +18,16 @@ public sealed interface CoolForest extends Ranker {
         }
 
         public double[] predictVec(Vec[] vecs) {
+            // TODO: Скорее всего, операция построения bds неоптимальная
             var bds = ConverterUtils.makeBds(vecs, grid);
-            double[] result = new double[vecs.length];
+            return predictBds(bds);
+        }
 
-            for (int i = 0; i < vecs.length; i++) {
+        private double[] predictBds(BinarizedDataSet bds) {
+            int vectorsCount = bds.bins(0).length;
+            double[] result = new double[vectorsCount];
+
+            for (int i = 0; i < vectorsCount; i++) {
                 result[i] = value(bds, i);
             }
 
