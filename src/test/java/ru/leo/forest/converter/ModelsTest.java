@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -57,12 +58,21 @@ public class ModelsTest extends ModelsTestBase {
         assertArrayEquals(expected, actual, 1e-5F);
     }
 
+    @ParameterizedTest
+    @Disabled
+    @MethodSource("provideModelsAndResults")
+    void testCoolForestGiant(Path model, double[] expected) throws IOException {
+        var coolForest = CoolForestFactory.makeCoolForestGiant(converter.readMonoforest(model), 500, 0.3);
+        var actual = coolForest.predictDouble(FEATURES);
+        assertArrayEquals(expected, actual, 1e-5F);
+    }
+
     private static Stream<Arguments> provideModelsAndResults() {
         return Stream.of(
-//            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS),
-//            Arguments.of(MODEL_10_PATH, MODEL_10_RESULTS),
-            Arguments.of(MODEL_100_PATH, MODEL_100_RESULTS)
-//            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS)
+            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS),
+            Arguments.of(MODEL_10_PATH, MODEL_10_RESULTS),
+            Arguments.of(MODEL_100_PATH, MODEL_100_RESULTS),
+            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS)
         );
     }
 }

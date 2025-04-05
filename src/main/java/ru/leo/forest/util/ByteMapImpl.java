@@ -9,7 +9,9 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 public class ByteMapImpl<T> implements Int2ObjectMap<T> {
-    private final T[] values = (T[]) new Object[128];
+    // TODO: Понять почему IndexOutOfBounds для 1 к деревьев происходит, если тут делать 128
+    // TODO: Из сетки приходит bin > 128.
+    private final T[] values = (T[]) new Object[256];
     private final IntSet keys = new IntArraySet();
 
     @Override
@@ -41,6 +43,11 @@ public class ByteMapImpl<T> implements Int2ObjectMap<T> {
     }
 
     @Override
+    public boolean containsKey(int key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean containsValue(Object value) {
         throw new UnsupportedOperationException();
     }
@@ -67,11 +74,6 @@ public class ByteMapImpl<T> implements Int2ObjectMap<T> {
 
     @Override
     public ObjectCollection<T> values() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean containsKey(int key) {
         throw new UnsupportedOperationException();
     }
 }

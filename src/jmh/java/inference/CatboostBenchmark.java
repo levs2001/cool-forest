@@ -24,6 +24,8 @@ public class CatboostBenchmark {
     @Param({
         "catboost_10_4",
         "catboost_100_6",
+        "model_1000_6",
+        "model_5000_6"
     })
     private String modelName;
 
@@ -36,8 +38,8 @@ public class CatboostBenchmark {
     @Benchmark
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 3, time = 10)
-    @Measurement(iterations = 3, time = 10)
+    @Warmup(iterations = 3, time = 5)
+    @Measurement(iterations = 3, time = 5)
     public void test(Blackhole bh) throws CatBoostError {
         bh.consume(model.predict(FEATURES_FLOAT, (String[][]) null));
     }

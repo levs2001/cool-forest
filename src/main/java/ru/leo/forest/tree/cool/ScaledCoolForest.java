@@ -19,4 +19,12 @@ public final class ScaledCoolForest extends CoolForest.Stub {
     public double value(BinarizedDataSet bds, int index) {
         return delegate.value(bds, index) * scale + bias;
     }
+
+    @Override
+    public void add(BinarizedDataSet bds, double[] value) {
+        delegate.add(bds, value);
+        for (int i = 0; i < value.length; i++) {
+            value[i] = value[i] * scale + bias;
+        }
+    }
 }

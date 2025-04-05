@@ -30,14 +30,16 @@ public class JmllEnsembleBenchmark {
     @Param({
         "model_10_4",
         "model_100_6",
+        "model_1000_6",
+        "model_5000_6",
     })
     private String modelName;
-    // TODO: Use enum
+
     @Param({
         "simple",
         "jmll",
         "bin",
-        "cool_forest"
+        "monoforest"
     })
     private String modelType;
 
@@ -48,7 +50,7 @@ public class JmllEnsembleBenchmark {
             case "simple" -> new FuncRanker(converter.readSimple(modelPath));
             case "jmll" -> new FuncRanker(converter.read(modelPath));
             case "bin" -> converter.readOTBin(modelPath);
-            case "cool_forest" -> CoolForestFactory.makeCoolForest(converter.readMonoforest(modelPath), 100, 0.3);
+            case "monoforest" -> new FuncRanker(converter.readMonoforest(modelPath));
             default -> throw new IllegalStateException("Unexpected value: " + modelType);
         };
     }
@@ -57,8 +59,8 @@ public class JmllEnsembleBenchmark {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
     @Fork(value = 1)
-    @Warmup(iterations = 3, time = 10)
-    @Measurement(iterations = 3, time = 10)
+    @Warmup(iterations = 3, time = 5)
+    @Measurement(iterations = 3, time = 5)
     public void test(Blackhole bh) {
         bh.consume(ranker.predictVec(FEATURES_VECS));
     }

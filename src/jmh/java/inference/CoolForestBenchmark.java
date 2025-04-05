@@ -26,28 +26,30 @@ public class CoolForestBenchmark {
     private static final Converter converter = new ConverterImpl();
 
     @Param({
-        "model_10_4",
-        "model_100_6",
+//        "model_10_4",
+//        "model_100_6",
+        "model_1000_6",
+        "model_5000_6"
     })
     private String modelName;
 
     @Param({
         "10",
         "30",
-        "50",
-        "100",
-        "300",
-        "500"
+//        "50",
+//        "100",
+//        "300",
+//        "500"
     })
     private int supportedTrigger;
 
     @Param({
-        "0.05",
-        "0.1",
-        "0.2",
-        "0.3",
+//        "0.05",
+//        "0.1",
+//        "0.2",
+//        "0.3",
         "0.4",
-        "0.5"
+//        "0.5"
     })
     private double supportedFeatureFreq;
     private volatile CoolForest coolForest;
@@ -55,6 +57,7 @@ public class CoolForestBenchmark {
     @Setup
     public void setup() throws IOException {
         var modelPath = BenchUtils.getModelPath(modelName + ".json");
+//        coolForest = CoolForestFactory.makeCoolForestGiant(converter.readMonoforest(modelPath), supportedTrigger, supportedFeatureFreq);
         coolForest = CoolForestFactory.makeCoolForest(converter.readMonoforest(modelPath), supportedTrigger, supportedFeatureFreq);
     }
 
@@ -62,8 +65,8 @@ public class CoolForestBenchmark {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
     @Fork(value = 1)
-    @Warmup(iterations = 3, time = 5)
-    @Measurement(iterations = 3, time = 5)
+    @Warmup(iterations = 3, time = 100)
+    @Measurement(iterations = 3, time = 30)
     public void test(Blackhole bh) {
         bh.consume(coolForest.predictVec(FEATURES_VECS));
     }

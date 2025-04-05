@@ -37,4 +37,19 @@ public final class CoolForestSupported extends CoolForest.Stub {
         }
         return result;
     }
+
+    @Override
+    public void add(BinarizedDataSet bds, double[] value) {
+        extra.add(bds, value);
+
+        for (int index = 0; index < value.length; index++) {
+            int supportedValue = bds.bins(supportFeatureIdx)[index];
+            for (int supportedKey : supportedKeys) {
+                if (supportedValue <= supportedKey) {
+                    break;
+                }
+                value[index] += supported.get(supportedKey).value(bds, index);
+            }
+        }
+    }
 }

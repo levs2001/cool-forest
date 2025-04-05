@@ -28,6 +28,8 @@ public class JmllMonoforestBenchmark {
     @Param({
         "monoforest_10_4",
         "monoforest_100_6",
+        "model_1000_6",
+        "model_5000_6"
     })
     private String modelName;
 

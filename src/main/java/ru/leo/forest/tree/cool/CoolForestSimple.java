@@ -38,4 +38,26 @@ public final class CoolForestSimple extends CoolForest.Stub {
 
         return result;
     }
+
+    @Override
+    public void add(BinarizedDataSet bds, double[] value) {
+        for (final FullMonom monom : monoms) {
+            final int[] featureIndices = monom.featureIndices();
+            final int[] monomBins = monom.featureBins();
+            double increment = monom.value();
+            for (int index = 0; index < value.length; index++) {
+                boolean isIncrement = true;
+                for (int j = 0; j < featureIndices.length; j++) {
+                    // TODO: Попробовать посмотреть будет ли ускорение если достать bins[][] и не вызывать метод
+                    if (bds.bins(featureIndices[j])[index] <= monomBins[j]) {
+                        isIncrement = false;
+                        break;
+                    }
+                }
+                if (isIncrement) {
+                    value[index] += increment;
+                }
+            }
+        }
+    }
 }
