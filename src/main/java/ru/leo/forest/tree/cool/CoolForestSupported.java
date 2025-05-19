@@ -7,9 +7,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 /**
  * Лес с опорным элементом, по которому сделано разбиение мономов
  **/
-// TODO: Стоит подумать о том, чтобы более более большие элементы supported содержали более маленькие
-//    В них больше мономов и ветвистость может быть лучше, а подобным полным разбиением мы ее убиваем.
-//    + тогда не придется по значением мапки идти и доставать поддеревья, а за раз достанем.
 public final class CoolForestSupported extends CoolForest.Stub {
     private final int supportFeatureIdx;
     private final Int2ObjectMap<CoolForest> supported;

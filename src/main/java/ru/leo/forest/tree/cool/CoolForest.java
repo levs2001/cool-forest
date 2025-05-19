@@ -7,7 +7,6 @@ import ru.leo.forest.converter.ConverterUtils;
 import ru.leo.forest.rank.Ranker;
 
 public sealed interface CoolForest extends Ranker {
-    // TODO: Сделать версию этого метода, которая сразу для всего считает, скорее всего на обходах мы победим.
     double value(BinarizedDataSet bds, int index);
 
     void add(BinarizedDataSet bds, double[] value);
@@ -21,18 +20,11 @@ public sealed interface CoolForest extends Ranker {
         }
 
         public double[] predictVec(Vec[] vecs) {
-            // TODO: Скорее всего, операция построения bds неоптимальная
             var bds = ConverterUtils.makeBds(vecs, grid);
             double[] result = new double[vecs.length];
             add(bds, result);
             return result;
         }
-
-//        public double[] predictVec(Vec[] vecs) {
-//            // TODO: Скорее всего, операция построения bds неоптимальная
-//            var bds = ConverterUtils.makeBds(vecs, grid);
-//            return predictBds(bds);
-//        }
 
         private double[] predictBds(BinarizedDataSet bds) {
             int vectorsCount = bds.bins(0).length;
