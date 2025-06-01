@@ -12,7 +12,7 @@ import ru.leo.forest.tree.Monom;
 import ru.leo.forest.tree.Split;
 
 public class MonoforestConverterImpl implements MonoforestConverter {
-    private static final String VALUE = "value";
+    private static final String VALUE = "bias";
     private final GridMaker gridMaker = new GridMakerImpl();
 
     @Override

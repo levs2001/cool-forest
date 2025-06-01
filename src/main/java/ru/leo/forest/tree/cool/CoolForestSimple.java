@@ -21,7 +21,7 @@ public final class CoolForestSimple extends CoolForest.Stub {
         for (final FullMonom monom : monoms) {
             final int[] featureIndices = monom.featureIndices();
             final int[] monomBins = monom.featureBins();
-            double increment = monom.value();
+            double increment = monom.bias();
             for (int j = 0; j < featureIndices.length; j++) {
                 if (bds.bins(featureIndices[j])[index] <= monomBins[j]) {
                     increment = 0;
@@ -39,7 +39,7 @@ public final class CoolForestSimple extends CoolForest.Stub {
         for (final FullMonom monom : monoms) {
             final int[] featureIndices = monom.featureIndices();
             final int[] monomBins = monom.featureBins();
-            double increment = monom.value();
+            double increment = monom.bias();
             for (int index = 0; index < value.length; index++) {
                 boolean isIncrement = true;
                 for (int j = 0; j < featureIndices.length; j++) {

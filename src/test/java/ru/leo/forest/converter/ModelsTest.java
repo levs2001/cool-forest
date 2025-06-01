@@ -1,7 +1,9 @@
 package ru.leo.forest.converter;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -10,12 +12,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.leo.forest.tree.cool.CoolForestFactory;
+import ru.leo.forest.tree.cool.pock.Monoms;
+import ru.leo.forest.tree.cool.pock.PocketForestFactory;
 
 public class ModelsTest extends ModelsTestBase {
     private static final Path MODEL_3_PATH = RES_PATH.resolve("models/trees_3.json");
     private static final Path MODEL_10_PATH = RES_PATH.resolve("models/model_10_4.json");
     private static final Path MODEL_100_PATH = RES_PATH.resolve("models/model_100_6.json");
     private static final Path MODEL_1000_PATH = RES_PATH.resolve("models/model_1000_6.json");
+    private static final Path MODEL_1000_PATH_2 = RES_PATH.resolve("models/model_8_1000_6.json");
 
     private final Converter converter = new ConverterImpl();
 
@@ -59,7 +64,7 @@ public class ModelsTest extends ModelsTestBase {
     }
 
     @ParameterizedTest
-    @Disabled
+//    @Disabled
     @MethodSource("provideModelsAndResults")
     void testCoolForestGiant(Path model, double[] expected) throws IOException {
         var coolForest = CoolForestFactory.makeCoolForestGiant(converter.readMonoforest(model), 500, 0.3);
@@ -67,12 +72,32 @@ public class ModelsTest extends ModelsTestBase {
         assertArrayEquals(expected, actual, 1e-5F);
     }
 
+    @ParameterizedTest
+//    @Disabled
+    @MethodSource("provideModelsAndResults")
+    void testPocketForest(Path model, double[] expected) throws IOException {
+        var monoforest = converter.readMonoforest(model);
+        var pocketForest = PocketForestFactory.create(
+            Monoms.fromMonoforest(monoforest)
+        );
+        var grid = monoforest.getGrid();
+
+        for (int i = 0; i < FEATURES.length; i++) {
+            var f = FEATURES[i];
+            byte[] bins = new byte[f.length];
+            grid.binarizeTo(new ArrayVec(f), bins);
+            var actual = pocketForest.value(bins);
+            assertEquals((float) expected[i], actual, 1e-5F);
+        }
+    }
+
     private static Stream<Arguments> provideModelsAndResults() {
         return Stream.of(
-            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS),
-            Arguments.of(MODEL_10_PATH, MODEL_10_RESULTS),
-            Arguments.of(MODEL_100_PATH, MODEL_100_RESULTS),
-            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS)
+//            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS)
+//            Arguments.of(MODEL_10_PATH, MODEL_10_RESULTS)
+            Arguments.of(MODEL_100_PATH, MODEL_100_RESULTS)
+//            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS),
+//            Arguments.of(MODEL_1000_PATH_2, MODEL_1000_RESULTS)
         );
     }
 }

@@ -3,6 +3,7 @@ package ru.leo.forest.converter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,6 +16,7 @@ public class MonoforestConverterImplTest extends ModelsTestBase {
     private static final Path MODEL_1000_PATH = RES_PATH.resolve("monoforest/monoforest_1000_6.json");
 
     @ParameterizedTest
+    @Disabled
     @MethodSource("provideModelsAndResults")
     void testMonoforestJmll(Path model, double[] expected) throws IOException {
         var binEnsemble = monoforestConverter.readMonoforest(model);

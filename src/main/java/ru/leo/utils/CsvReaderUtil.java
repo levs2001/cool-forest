@@ -69,7 +69,7 @@ public class CsvReaderUtil {
         int[][] result = new int[rows.size()][featuresInRowN];
         for (int i = 0; i < rows.size(); i++) {
             String[] vals = rows.get(i).split(",");
-            // First index value skipped
+            // First index bias skipped
             for (int j = 1; j < vals.length; j++) {
                 result[i][j - 1] = Integer.parseInt(vals[j]);
             }

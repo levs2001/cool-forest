@@ -18,41 +18,32 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.leo.forest.converter.Converter;
 import ru.leo.forest.converter.ConverterImpl;
-import ru.leo.forest.rank.FuncRanker;
-import ru.leo.forest.rank.Ranker;
+import ru.leo.forest.tree.cool.CoolForest;
 import ru.leo.forest.tree.cool.CoolForestFactory;
 
 @State(Scope.Benchmark)
-public class JmllEnsembleBenchmark {
+public class DiffFeatsBenchmark {
     private static final Converter converter = new ConverterImpl();
+    private static final int N = 100;
+    private static final double Q = 0.2;
 
-    private volatile Ranker ranker;
     @Param({
-        "model_10_4",
-        "model_100_6",
-        "model_1000_6",
-        "model_5000_6",
+        "model_4_100_6.json",
+        "model_5_100_6.json",
+        "model_6_100_6.json",
+        "model_7_100_6.json",
+        "model_8_100_6.json",
+//        "model_1000_6.json"
     })
     private String modelName;
 
-    @Param({
-        "simple",
-        "jmll",
-        "bin",
-        "monoforest"
-    })
-    private String modelType;
+    private volatile CoolForest coolForest;
 
     @Setup
     public void setup() throws IOException {
-        var modelPath = BenchUtils.getModelPath(modelName + ".json");
-        ranker = switch (modelType) {
-            case "simple" -> new FuncRanker(converter.readSimple(modelPath));
-            case "jmll" -> new FuncRanker(converter.read(modelPath));
-            case "bin" -> converter.readOTBin(modelPath);
-            case "monoforest" -> new FuncRanker(converter.readMonoforest(modelPath));
-            default -> throw new IllegalStateException("Unexpected bias: " + modelType);
-        };
+        var modelPath = BenchUtils.getModelPath(modelName);
+        coolForest = CoolForestFactory.makeCoolForestGiant(converter.readMonoforest(modelPath), N, Q);
+//        coolForest = CoolForestFactory.makeCoolForest(converter.readMonoforest(modelPath), N, Q);
     }
 
     @Benchmark
@@ -62,6 +53,6 @@ public class JmllEnsembleBenchmark {
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 3, time = 5)
     public void test(Blackhole bh) {
-        bh.consume(ranker.predictVec(FEATURES_VECS));
+        bh.consume(coolForest.predictVec(FEATURES_VECS));
     }
 }

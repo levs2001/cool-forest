@@ -2,6 +2,7 @@ package ru.leo.forest.tree.cool;
 
 import com.expleague.ml.BFGrid;
 import com.expleague.ml.models.ModelTools;
+import it.unimi.dsi.fastutil.ints.AbstractInt2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -63,7 +64,7 @@ public class CoolForestFactory {
 
         var featureUsage = getFeatureUsageFreq(monoms);
         var mostCommonFeature = featureUsage.int2IntEntrySet().stream()
-            .max(Comparator.comparingInt(Int2IntMap.Entry::getIntValue)).get();
+            .max(Comparator.comparingInt(Int2IntMap.Entry::getIntValue)).orElse(new AbstractInt2IntMap.BasicEntry(0, 0));
         int freq = mostCommonFeature.getIntValue();
         if ((double) freq / monoms.size() < supportedFeatureFreq) {
             return new CoolForestSimple(bfGrid, monoms);

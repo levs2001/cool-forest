@@ -1,4 +1,4 @@
-package ru.leo.forest.tree.cool;
+package ru.leo.forest.tree.cool.pock;
 
 import com.expleague.ml.BFGrid;
 import com.expleague.ml.models.ModelTools;
@@ -7,12 +7,13 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 
-public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices, double bias) {
+// TODO: Убрать лишнее
+public record PocketMonom(int[] featureIndices, int[] featureBins, int[] bfIndices, float bias) {
     public static final int NO_FEATURE = -1;
 
     // TODO: Выяснить почему в jmll bin не byte, а int
     // TODO: Если построение CoolForest будем долним сделать сет для featureIndices
-    public static FullMonom fromEntry(ModelTools.CompiledOTEnsemble.Entry entry, BFGrid grid) {
+    public static PocketMonom fromEntry(ModelTools.CompiledOTEnsemble.Entry entry, BFGrid grid) {
         int[] bfIndices = new int[entry.getBfIndices().length];
         int[] featureIdx = new int[bfIndices.length];
         int[] featureBins = new int[bfIndices.length];
@@ -24,7 +25,7 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
             featureBins[i] = feature.bin();
         }
 
-        return new FullMonom(featureIdx, featureBins, bfIndices, entry.getValue());
+        return new PocketMonom(featureIdx, featureBins, bfIndices, (float) entry.getValue());
     }
 
     // TODO: Make better hash if need
@@ -32,7 +33,7 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
         return Arrays.toString(bfIndices).hashCode();
     }
 
-    public boolean isSameCondition(FullMonom other) {
+    public boolean isSameCondition(PocketMonom other) {
         return Objects.deepEquals(this.bfIndices, other.bfIndices);
     }
 
@@ -44,8 +45,8 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FullMonom fullMonom = (FullMonom) o;
-        return Double.compare(bias, fullMonom.bias) == 0 && Objects.deepEquals(bfIndices, fullMonom.bfIndices);
+        PocketMonom fullMonom = (PocketMonom) o;
+        return Float.compare(bias, fullMonom.bias) == 0; // && Objects.deepEquals(bfIndices, fullMonom.bfIndices);
     }
 
     @Override
@@ -53,7 +54,7 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
         return Objects.hash(Arrays.hashCode(featureIndices), Arrays.hashCode(featureBins), Arrays.hashCode(bfIndices), bias);
     }
 
-    public FullMonom without(int featureIdx) {
+    public PocketMonom without(int featureIdx) {
         int deleteIndex = getIndex(featureIdx);
         if (deleteIndex == NO_FEATURE) {
             throw new NoSuchElementException("No feature: " + featureIdx);
@@ -72,15 +73,15 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
             shortedBfIndices[realIndex] = bfIndices[i];
         }
 
-        return new FullMonom(shortedFeatureIndices, shortedFeatureBins, shortedBfIndices, bias);
+        return new PocketMonom(shortedFeatureIndices, shortedFeatureBins, shortedBfIndices, bias);
     }
 
-    public FullMonom slice(int featureIdx, int featureBin) {
+    public PocketMonom slice(int featureIdx, int featureBin) {
         int slicedFeatureIndex = getIndex(featureIdx);
         if (slicedFeatureIndex == NO_FEATURE) {
             return this;
         }
-        if (featureBins[slicedFeatureIndex] <= featureBin) {
+        if (featureBin <= featureBins[slicedFeatureIndex]) {
             // Условие не выполняется, можно не учитывать моном.
             return null;
         }
@@ -103,7 +104,7 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
             shortedBfIndices[realIndex] = bfIndices[i];
         }
 
-        return new FullMonom(shortedFeatureIndices, shortedFeatureBins, shortedBfIndices, bias);
+        return new PocketMonom(shortedFeatureIndices, shortedFeatureBins, shortedBfIndices, bias);
     }
 
     public int bin(int index) {
@@ -133,8 +134,8 @@ public record FullMonom(int[] featureIndices, int[] featureBins, int[] bfIndices
         return ArrayUtils.contains(featureIndices, featureIdx);
     }
 
-    static FullMonom onlyBias(double bias) {
-        return new FullMonom(EMPTY, EMPTY, EMPTY, bias);
+    static PocketMonom onlyBias(float bias) {
+        return new PocketMonom(EMPTY, EMPTY, EMPTY, bias);
     }
 
     private static final int[] EMPTY = new int[0];
