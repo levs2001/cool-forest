@@ -7,12 +7,12 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.leo.forest.tree.cool.CoolForestFactory;
 import ru.leo.forest.tree.cool.pock.Monoms;
+import ru.leo.forest.tree.cool.pock.PocketForestEnsembleFactory;
 import ru.leo.forest.tree.cool.pock.PocketForestFactory;
 
 public class ModelsTest extends ModelsTestBase {
@@ -91,12 +91,31 @@ public class ModelsTest extends ModelsTestBase {
         }
     }
 
+    @ParameterizedTest
+//    @Disabled
+    @MethodSource("provideModelsAndResults")
+    void testPocketForestEnsemble(Path model, double[] expected) throws IOException {
+        var monoforest = converter.readMonoforest(model);
+        var pocketForest = PocketForestEnsembleFactory.create(
+            Monoms.fromMonoforest(monoforest)
+        );
+        var grid = monoforest.getGrid();
+
+        for (int i = 0; i < FEATURES.length; i++) {
+            var f = FEATURES[i];
+            byte[] bins = new byte[f.length];
+            grid.binarizeTo(new ArrayVec(f), bins);
+            var actual = pocketForest.value(bins);
+            assertEquals((float) expected[i], actual, 1e-5F);
+        }
+    }
+
     private static Stream<Arguments> provideModelsAndResults() {
         return Stream.of(
-//            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS)
+//            Arguments.of(MODEL_3_PATH, MODEL_3_RESULTS),
 //            Arguments.of(MODEL_10_PATH, MODEL_10_RESULTS)
             Arguments.of(MODEL_100_PATH, MODEL_100_RESULTS)
-//            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS),
+//            Arguments.of(MODEL_1000_PATH, MODEL_1000_RESULTS)
 //            Arguments.of(MODEL_1000_PATH_2, MODEL_1000_RESULTS)
         );
     }
