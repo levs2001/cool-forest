@@ -14,6 +14,7 @@ import ru.leo.forest.tree.cool.CoolForestFactory;
 import ru.leo.forest.tree.cool.pock.Monoms;
 import ru.leo.forest.tree.cool.pock.PocketForestEnsembleFactory;
 import ru.leo.forest.tree.cool.pock.PocketForestFactory;
+import ru.leo.utils.JsonUtil;
 
 public class ModelsTest extends ModelsTestBase {
     private static final Path MODEL_3_PATH = RES_PATH.resolve("models/trees_3.json");
@@ -92,11 +93,10 @@ public class ModelsTest extends ModelsTestBase {
     }
 
     @ParameterizedTest
-//    @Disabled
     @MethodSource("provideModelsAndResults")
     void testPocketForestEnsemble(Path model, double[] expected) throws IOException {
         var monoforest = converter.readMonoforest(model);
-        var pocketForest = PocketForestEnsembleFactory.create(
+        var pocketForest = PocketForestEnsembleFactory.createEnsemble(
             Monoms.fromMonoforest(monoforest)
         );
         var grid = monoforest.getGrid();
@@ -108,6 +108,24 @@ public class ModelsTest extends ModelsTestBase {
             var actual = pocketForest.value(bins);
             assertEquals((float) expected[i], actual, 1e-5F);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideModelsAndResults")
+    void testPocketForestFromEnsemble(Path model, double[] expected) throws IOException {
+        var monoforest = converter.readMonoforest(model);
+        var pocketForest = PocketForestEnsembleFactory.createRowPocketForest(Monoms.fromMonoforest(monoforest));
+        var grid = monoforest.getGrid();
+
+        for (int i = 0; i < FEATURES.length; i++) {
+            var f = FEATURES[i];
+            byte[] bins = new byte[f.length];
+            grid.binarizeTo(new ArrayVec(f), bins);
+            var actual = pocketForest.value(bins);
+            assertEquals((float) expected[i], actual, 1e-5F);
+        }
+
+        JsonUtil.save(Path.of("pocket_forest_100_6.json"), pocketForest);
     }
 
     private static Stream<Arguments> provideModelsAndResults() {

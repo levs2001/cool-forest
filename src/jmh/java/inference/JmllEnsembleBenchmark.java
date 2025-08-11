@@ -28,18 +28,18 @@ public class JmllEnsembleBenchmark {
 
     private volatile Ranker ranker;
     @Param({
-        "model_10_4",
+//        "model_10_4",
         "model_100_6",
-        "model_1000_6",
-        "model_5000_6",
+//        "model_1000_6",
+//        "model_5000_6",
     })
     private String modelName;
 
     @Param({
-        "simple",
-        "jmll",
+//        "simple",
+//        "jmll",
         "bin",
-        "monoforest"
+//        "monoforest"
     })
     private String modelType;
 

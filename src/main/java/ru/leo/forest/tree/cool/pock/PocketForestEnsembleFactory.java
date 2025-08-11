@@ -4,12 +4,40 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PocketForestEnsembleFactory {
-    public static PocketForestEnsemble create(Monoms monoms) {
-        List<long[][]> blocksList = new ArrayList<>();
-        createInternal(monoms, blocksList);
+    private static final Logger log = LoggerFactory.getLogger(PocketForestEnsembleFactory.class);
+    private static final int MONOMS_MAX_COUNT = 10_000;
+
+    public static PocketForest createRowPocketForest(Monoms monoms) {
+        var blocksList = createInternal(monoms);
+        var rowPocketForest = PocketForestFactory.fromPocketForestEnsemble(blocksList);
+        log.info("Row pocket forest final matrix size: {}", rowPocketForest.blocks().length);
+        return rowPocketForest;
+    }
+
+    public static PocketForestEnsemble createEnsemble(Monoms monoms) {
+        var blocksList = createInternal(monoms);
         return new PocketForestEnsemble(blocksList.toArray(new long[0][][]));
+    }
+
+    public static List<long[][]> createInternal(Monoms monoms) {
+        var top = monoms.monoms().stream()
+            .sorted((m1, m2) -> Float.compare(m1.bias(), m2.bias()))
+            .limit(MONOMS_MAX_COUNT)
+            .toList();
+        var topMonoms = Monoms.create(top, monoms.bias());
+        List<long[][]> blocksList = new ArrayList<>();
+        log.info("Starting ensemble building. Monoms count: {}", topMonoms.size());
+        createInternal(topMonoms, blocksList);
+        log.info("Created pocket forest ensemble, size: {}, max matrix size: {}",
+            blocksList.size(), blocksList.stream().map(m -> m.length).max(Comparator.comparingInt(d -> d)).get());
+        for (int i = 0; i < blocksList.size(); i++) {
+            log.info("Matrix {}, size: {}", i, blocksList.get(i).length);
+        }
+        return blocksList;
     }
 
     private static void createInternal(Monoms monoms, List<long[][]> matrixes) {
@@ -17,13 +45,21 @@ public class PocketForestEnsembleFactory {
             return;
         }
 
-        var grouped = monoms.groupedMonoms();
-        var bestGroup = grouped.entrySet().stream().max(Comparator.comparingInt(v -> v.getValue().monoms().size())).get();
-        var matrix = PocketForestFactory.create(Monoms.create(bestGroup.getValue().monoms(), monoms.bias())).blocks();
-        matrixes.add(matrix);
-        var newMonoms = monoms.monoms().stream().filter(m -> !m.isIncludedIn(bestGroup.getKey())).toList();
+        log.info("Ensemble building step, matrixes size: {}, monoms left count: {}", matrixes.size(), monoms.size());
 
-        createInternal(new Monoms(newMonoms, 0.0f, Monoms.firstIdx(newMonoms)), matrixes);
+        var grouped = monoms.groupedMonoms();
+        var bestGroup = grouped.stream().max(
+            Comparator.comparingDouble(
+                v -> Math.log(v.monoms().size()) / Math.log(v.key().size())
+            )
+        ).get();
+        log.info("Best group: {}, monoms count: {}, combinations count: {}", bestGroup.key(), bestGroup.monoms().size(),
+            bestGroup.combinationsCount());
+        var matrix = PocketForestFactory.create(Monoms.create(bestGroup.monoms(), monoms.bias())).blocks();
+        log.info("matrix size: {}", matrix.length);
+        matrixes.add(matrix);
+        var newMonoms = monoms.monoms().stream().filter(m -> !m.isIncludedIn(bestGroup.key())).toList();
+        createInternal(Monoms.create(newMonoms, 0.0f), matrixes);
     }
 
     public static void emulateBuild(Monoms monoms) {
@@ -37,6 +73,4 @@ public class PocketForestEnsembleFactory {
         var newMonoms = monoms.monoms().stream().filter(m -> !m.isIncludedIn(bestIndices)).toList();
         emulateBuild(Monoms.create(newMonoms, 0));
     }
-
-
 }

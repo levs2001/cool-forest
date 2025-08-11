@@ -19,6 +19,7 @@ public class BenchUtils {
             FEATURES_DOUBLE = CsvReaderUtil.readNumeric(FEATURES_PATH, false);
             FEATURES_FLOAT = ConverterUtils.toFloat(FEATURES_DOUBLE);
             FEATURES_VECS = ConverterUtils.toVecs(FEATURES_DOUBLE);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

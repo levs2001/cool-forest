@@ -24,6 +24,9 @@ public record PocketMonom(int[] featureIndices, int[] featureBins, float bias) {
             var feature = grid.bf(bfIndex);
             featureIdx[i] = feature.findex();
             featureBins[i] = feature.bin();
+            if (feature.bin() < 0 || feature.bin() > 255) {
+                throw new IllegalStateException();
+            }
         }
 
         return new PocketMonom(featureIdx, featureBins, (float) entry.getValue());
