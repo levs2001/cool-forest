@@ -2,10 +2,13 @@ package ru.leo.forest.tree.cool.pock;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PocketForestFactory {
-    public static final int BINS_COUNT = 127;
+    public static final int BINS_COUNT = 64;
     private static final int END_BLOCK_IDX = -1;
+    private static final Logger log = LoggerFactory.getLogger(PocketForestFactory.class);
 
     public static PocketForest fromPocketForestEnsemble(List<long[][]> ensemble) {
         var allMatrixSize = ensemble.stream().mapToInt(e -> e.length).sum();
@@ -52,6 +55,7 @@ public class PocketForestFactory {
     }
 
     public static int createInternal(Monoms monoms, List<long[]> r) {
+        log.info("Result matrix size: {}, monoms: {}", r.size(), monoms.size());
         // TODO: r очень быстро растет.
         // TODO: Фактически в b==0 мы пишем все мономы в которых вообще нет данной фичи
         // Можно попробовать полученный slice учесть, удалить из других веток и все ветки в конце направить на него.

@@ -22,10 +22,11 @@ import org.openjdk.jmh.infra.Blackhole;
 public class CatboostBenchmark {
     private volatile CatBoostModel model;
     @Param({
-        "catboost_10_4",
-        "catboost_100_6",
-        "model_1000_6",
-        "model_5000_6"
+//        "catboost_10_4",
+//        "catboost_100_6",
+//        "model_1000_6",
+//        "model_5000_6"
+        "m_1749464806_osrch_64885_search_l2_conv__true_prices_control"
     })
     private String modelName;
 

@@ -38,24 +38,35 @@ public class CsvReaderUtil {
     }
 
 
-    public static float[][] readNumericWithOrder(String file, String[] order) throws IOException {
-        List<String> rows = Files.readAllLines(Path.of(file));
+    public static float[][] readNumericWithOrder(String file, String[] order, int count) throws IOException {
+        List<String> rows = new ArrayList<>(count);
+        try (var reader = Files.newBufferedReader(Path.of(file))) {
+            for (int i = 0; i < count; i++) {
+                rows.add(reader.readLine());
+            }
+        }
         var header = rows.removeFirst();
         var colNames = header.split(",");
-        var columns = new HashMap<String, List<Float>>(colNames.length);
+        var columns = new HashMap<String, float[]>(colNames.length);
 
-        for (var row : rows) {
+        for (int r = 0; r < rows.size(); r++) {
             int i = 0;
             for (var col : colNames) {
-                var featuresInRow = row.split(",");
-                columns.computeIfAbsent(col, k -> new ArrayList<>()).add(Float.parseFloat(featuresInRow[i++]));
+                var featuresInRow = rows.get(r).split(",");
+                float fl;
+                try {
+                    fl = Float.parseFloat(featuresInRow[i++]);
+                } catch (NumberFormatException e) {
+                    fl = 0.0f;
+                }
+                columns.computeIfAbsent(col, k -> new float[rows.size()])[r] = fl;
             }
         }
 
-        float[][] result = new float[rows.size()][colNames.length];
-        for (int j = 0; j < order.length; j++) {
-            for (int i = 0; i < rows.size(); i++) {
-                result[i][j] = columns.get(order[i]).get(j);
+        float[][] result = new float[rows.size()][order.length];
+        for (int i = 0; i < rows.size(); i++) {
+            for (int j = 0; j < order.length; j++) {
+                result[i][j] = columns.get(order[j])[i];
             }
         }
 
@@ -91,7 +102,30 @@ public class CsvReaderUtil {
         return result;
     }
 
+    public static void write(String file, float[][] toWrite) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (float[] floats : toWrite) {
+            for (int j = 0; j < floats.length; j++) {
+                sb.append(floats[j]);
+                if (j != floats.length - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append("\n");
+        }
+        Files.writeString(Path.of(file), sb.toString());
+    }
+
     public static void write(String file, double[] toWrite) throws IOException {
         Files.write(Path.of(file), Arrays.stream(toWrite).mapToObj(Double::toString).toList());
+    }
+
+    public static void main(String[] args) throws IOException {
+        var d = CsvReaderUtil.readNumericWithOrder(
+            "./real_models/first_thousand_rows.csv",
+            FeaturesList.NAMES,
+            2000
+        );
+        CsvReaderUtil.write("d.csv", d);
     }
 }

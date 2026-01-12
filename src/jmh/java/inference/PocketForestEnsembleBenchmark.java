@@ -32,7 +32,8 @@ public class PocketForestEnsembleBenchmark {
     private volatile PocketForest model;
     private volatile byte[][] features;
     @Param({
-        "model_100_6.json",
+//        "model_100_6.json",
+        "m_1749464806_osrch_64885_search_l2_conv__true_prices_control.json"
     })
     private String modelName;
 

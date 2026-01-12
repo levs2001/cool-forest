@@ -29,7 +29,7 @@ public class JmllEnsembleBenchmark {
     private volatile Ranker ranker;
     @Param({
 //        "model_10_4",
-        "model_100_6",
+        "m_1749464806_osrch_64885_search_l2_conv__true_prices_control",
 //        "model_1000_6",
 //        "model_5000_6",
     })

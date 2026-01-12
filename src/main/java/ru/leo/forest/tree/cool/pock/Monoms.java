@@ -13,6 +13,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -192,6 +194,16 @@ public record Monoms(List<PocketMonom> monoms, float bias, int bestFeatureIdx) {
         return result;
     }
 
+    public Object2IntMap<IntList> monomIndicesCount() {
+        Object2IntMap<IntList> result = new Object2IntOpenHashMap<>();
+        for (var m : monoms) {
+            var key = new IntArrayList(m.featureIndices());
+            result.put(key, result.getOrDefault(key, 0) + 1);
+        }
+
+        return result;
+    }
+
     public List<IntList> connectedFeatures() {
         return GraphUtil.findConnectedComponentsFromGroups(monoms.stream().map(PocketMonom::featureIndices).toList());
     }
@@ -200,7 +212,7 @@ public record Monoms(List<PocketMonom> monoms, float bias, int bestFeatureIdx) {
         System.out.println(GraphUtil.findConnectedComponentsFromGroups(List.of(new int[] {0, 1}, new int[] {2, 3})));
     }
 
-    public record MonomGroup(IntList key, List<PocketMonom> monoms, int combinationsCount) {
+    public record MonomGroup(IntList key, List<PocketMonom> monoms) {
         public static MonomGroup create(IntList key, List<PocketMonom> monoms) {
             Int2ObjectMap<IntSet> featureToBins = new Int2ObjectArrayMap<>(key.size());
             for (var m : monoms) {
@@ -210,12 +222,8 @@ public record Monoms(List<PocketMonom> monoms, float bias, int bestFeatureIdx) {
                         .add(m.featureBins()[i]);
                 }
             }
-            int combinationsCount = 1;
-            for (var v : featureToBins.values()) {
-                combinationsCount *= v.size();
-            }
 
-            return new MonomGroup(key, monoms, combinationsCount);
+            return new MonomGroup(key, monoms);
         }
     }
 }

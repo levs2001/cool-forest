@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import ru.leo.forest.converter.ConverterUtils;
 import ru.leo.utils.CsvReaderUtil;
+import ru.leo.utils.FeaturesList;
 
 public class BenchUtils {
     private static final Path RES_PATH = Path.of("./src/jmh/resources/");
     private static final Path MODELS_PATH = RES_PATH.resolve("models");
-    private static final Path FEATURES_PATH = RES_PATH.resolve("data/X_2000.csv");
+    //    private static final Path FEATURES_PATH = RES_PATH.resolve("data/X_2000.csv");
+    private static final Path FEATURES_PATH = RES_PATH.resolve("data/prod_X.csv");
     public static final double[][] FEATURES_DOUBLE;
     public static final float[][] FEATURES_FLOAT;
     public static final Vec[] FEATURES_VECS;

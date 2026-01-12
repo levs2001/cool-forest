@@ -28,12 +28,13 @@ public class DiffFeatsBenchmark {
     private static final double Q = 0.2;
 
     @Param({
-        "model_4_100_6.json",
-        "model_5_100_6.json",
-        "model_6_100_6.json",
-        "model_7_100_6.json",
-        "model_8_100_6.json",
+//        "model_4_100_6.json",
+//        "model_5_100_6.json",
+//        "model_6_100_6.json",
+//        "model_7_100_6.json",
+//        "model_8_100_6.json",
 //        "model_1000_6.json"
+        "m_1749464806_osrch_64885_search_l2_conv__true_prices_control.json"
     })
     private String modelName;
 
